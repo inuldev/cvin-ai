@@ -1,7 +1,3 @@
 export default function Home() {
-  return (
-    <div>
-      <p>cvIN - AI - Resume Builder</p>
-    </div>
-  );
+  return <main>Front page</main>;
 }
