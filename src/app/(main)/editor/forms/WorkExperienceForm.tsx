@@ -38,6 +38,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+import GenerateWorkExperienceButton from "./GenerateWorkExperienceButton";
+
 export default function WorkExperienceForm({
   resumeData,
   setResumeData,
@@ -178,6 +180,13 @@ function WorkExperienceItem({
           className="size-5 cursor-grab text-muted-foreground focus:outline-none"
           {...attributes}
           {...listeners}
+        />
+      </div>
+      <div className="flex justify-center">
+        <GenerateWorkExperienceButton
+          onWorkExperienceGenerated={(exp) =>
+            form.setValue(`workExperiences.${index}`, exp)
+          }
         />
       </div>
       <FormField

@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 
+import GenerateSummaryButton from "./GenerateSummaryButton";
+
 export default function SummaryForm({
   resumeData,
   setResumeData,
@@ -41,7 +43,7 @@ export default function SummaryForm({
         <h2 className="text-2xl font-semibold">Professional summary</h2>
         <p className="text-sm text-muted-foreground">
           Write a short introduction for your resume or let the AI generate one
-          from your data.
+          from your entered data.
         </p>
       </div>
       <Form {...form}>
@@ -59,6 +61,12 @@ export default function SummaryForm({
                   />
                 </FormControl>
                 <FormMessage />
+                <GenerateSummaryButton
+                  resumeData={resumeData}
+                  onSummaryGenerated={(summary) =>
+                    form.setValue("summary", summary)
+                  }
+                />
               </FormItem>
             )}
           />
