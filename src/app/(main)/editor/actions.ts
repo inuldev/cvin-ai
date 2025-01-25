@@ -6,11 +6,11 @@ import { auth } from "@clerk/nextjs/server";
 
 import prisma from "@/lib/prisma";
 import { resumeSchema, ResumeValues } from "@/lib/validation";
+import { getUserSubscriptionLevel } from "@/lib/subscription";
+import { canCreateResume, canUseCustomizations } from "@/lib/permissions";
 
 export async function saveResume(values: ResumeValues) {
   const { id } = values;
-
-  console.log("received values", values);
 
   const { photo, workExperiences, educations, ...resumeValues } =
     resumeSchema.parse(values);
@@ -21,7 +21,17 @@ export async function saveResume(values: ResumeValues) {
     throw new Error("User not authenticated");
   }
 
-  // TODO: Check resume count for non-premium users
+  const subscriptionLevel = await getUserSubscriptionLevel(userId);
+
+  if (!id) {
+    const resumeCount = await prisma.resume.count({ where: { userId } });
+
+    if (!canCreateResume(subscriptionLevel, resumeCount)) {
+      throw new Error(
+        "Maximum resume count reached for this subscription level",
+      );
+    }
+  }
 
   const existingResume = id
     ? await prisma.resume.findUnique({ where: { id, userId } })
@@ -29,6 +39,16 @@ export async function saveResume(values: ResumeValues) {
 
   if (id && !existingResume) {
     throw new Error("Resume not found");
+  }
+
+  const hasCustomizations =
+    (resumeValues.borderStyle &&
+      resumeValues.borderStyle !== existingResume?.borderStyle) ||
+    (resumeValues.colorHex &&
+      resumeValues.colorHex !== existingResume?.colorHex);
+
+  if (hasCustomizations && !canUseCustomizations(subscriptionLevel)) {
+    throw new Error("Customizations not allowed for this subscription level");
   }
 
   let newPhotoUrl: string | undefined | null = undefined;
